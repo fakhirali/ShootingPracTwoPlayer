@@ -56,6 +56,7 @@ function ImReady(){
 	el.remove()
 	ready = true;
 	conn.send({ready});	
+	restart();
 	
 }
 
@@ -64,20 +65,28 @@ function startScene(){
 	ready = false;
 	timer = createElement('timer');
 	timer.position(20,5);
+	countdown = 5;	
 	interval = setInterval(TimeIt,1000);
 
 }
 
 function TimeIt(){
 	timer.html(countdown);	
-countdown --;
+	countdown --;
 	if (countdown < 0 && game == false){
 		countdown = 30;
 		startGame();
 	}else if (countdown < 0 && game){
 		end = true;
+		game = false;
 		countdown = 0;
-		 
+		ready = false;
+		otherReady = false;
+		showConnected();
+		
+		timer.remove();
+		clearInterval(interval);
+		
 		
 	}
 
@@ -86,7 +95,6 @@ countdown --;
 function startGame(){
 	setxy();
 	game = true;
-	
 
 	
 }
@@ -110,7 +118,12 @@ function setxy(){
 	}
 }
 
-
+function restart(){
+	ototalhits = 0;
+	totalhits = 0;
+	
+	
+}
 
 
 
@@ -125,7 +138,7 @@ function setup() {
 		peer.on('open', function(){
 	
 			conn = peer.connect(url.split("?")[1],{
-				reliable: true
+				reliable: false
 			});
 			conn.on('open', function() {
 				peerid = conn.peer;
@@ -134,7 +147,8 @@ function setup() {
 			});
 			
 			conn.on('data', function(data) {
-				print(data.ready);
+				
+				print("ready" + data.ready);
 				otherReady = data.ready;
 				
 			});
@@ -187,6 +201,7 @@ function draw() {
 	line(cnvWidth/2,0,cnvWidth/2,cnvHeight);
 	if (ready && otherReady){
 		startScene();
+		end = false;
 	
 	}
 	if(game && end == false){
@@ -230,6 +245,9 @@ function mousePressed(){
 			totalhits += 1;
 			setxy()
 		}
+	}else{
+		//ready = true;
+		
 	}
   
 
